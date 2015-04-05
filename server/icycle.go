@@ -83,7 +83,7 @@ func handlerWorkerTimestamp(w http.ResponseWriter, r *http.Request) {
 
 func Main() {
     if (!initWorker()) {
-        log.Fatal("Enable to init worker")
+        log.Fatal("Unable to init worker")
         return
     }
 
