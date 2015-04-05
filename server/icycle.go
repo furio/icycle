@@ -19,28 +19,18 @@ var (
 )
 var idGenerator *idworker.IdWorker
 
-type Sequence struct {
-    Sequence int64
-    Error error
-}
-type SequenceStr struct {
-    Sequence string
-    Error error
-}
-
-
-func handlerTest(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Hello World!")
+func handlerHome(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Hi from icycle: %s", idGenerator.String())
 }
 
 func handlerId(w http.ResponseWriter, r *http.Request) {
     seq,err := idGenerator.NextId();
 
-    profile := Sequence{seq, err}
+    profile := map[string]interface{}{"sequence": seq, "error": err}
 
-    js, err := json.Marshal(profile)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
+    js, jerr := json.Marshal(profile)
+    if jerr != nil {
+        http.Error(w, jerr.Error(), http.StatusInternalServerError)
         return
     }
 
@@ -50,13 +40,13 @@ func handlerId(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlerIdStr(w http.ResponseWriter, r *http.Request) {
-    seq,err := idGenerator.NextId();
+    seq, err := idGenerator.NextId();
 
-    profile := SequenceStr{strconv.FormatInt(seq, 10), err}
+    profile := map[string]interface{}{"sequence": strconv.FormatInt(seq, 10), "error": err}
 
-    js, err := json.Marshal(profile)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
+    js, jerr := json.Marshal(profile)
+    if jerr != nil {
+        http.Error(w, jerr.Error(), http.StatusInternalServerError)
         return
     }
 
@@ -66,7 +56,29 @@ func handlerIdStr(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlerWorker(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "%s", idGenerator.String())
+    ts := map[string]int64{"workerId": idGenerator.WorkerId(), "datacenterId": idGenerator.DatacenterId()}
+
+    js, jerr := json.Marshal(ts)
+    if jerr != nil {
+        http.Error(w, jerr.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    w.Write(js)
+}
+
+func handlerWorkerTimestamp(w http.ResponseWriter, r *http.Request) {
+    ts := map[string]string{"timestamp": strconv.FormatInt(idGenerator.Timestamp(), 10)}
+
+    js, jerr := json.Marshal(ts)
+    if jerr != nil {
+        http.Error(w, jerr.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    w.Write(js)
 }
 
 func Main() {
@@ -76,11 +88,12 @@ func Main() {
     }
 
     runtime.GOMAXPROCS(runtime.NumCPU())
-    http.HandleFunc("/", handlerTest)
+    http.HandleFunc("/", handlerHome)
 
     http.HandleFunc("/id", handlerId)
     http.HandleFunc("/id/str", handlerIdStr)
     http.HandleFunc("/worker", handlerWorker)
+    http.HandleFunc("/worker/timestamp", handlerWorkerTimestamp)
 
     log.Printf("Serving on port :%s", *port)
     http.ListenAndServe(":" + *port, nil)

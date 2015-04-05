@@ -20,7 +20,6 @@ const (
     sequenceMask = int64(-1) ^ (int64(-1) << sequenceBits)
 )
 
-
 type IdWorker struct {
     workerId int64
     datacenterId int64
@@ -61,6 +60,14 @@ func (w *IdWorker) String() string {
 
 func (w *IdWorker) Timestamp() int64 {
     return millis();
+}
+
+func (w *IdWorker) WorkerId() int64 {
+    return w.workerId;
+}
+
+func (w *IdWorker) DatacenterId() int64 {
+    return w.datacenterId;
 }
 
 func (w *IdWorker) NextId() (int64, error) {
