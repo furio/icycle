@@ -12,8 +12,8 @@ import (
 )
 
 var (
-    workerId = flag.Int64("w", 5, "Worker id")
-    datacenterId = flag.Int64("d", 1, "Datacenter id")
+    workerId = flag.Int64("w", 0, "Worker id")
+    datacenterId = flag.Int64("d", 0, "Datacenter id")
     port = flag.String("p", "9000", "Port to listen on")
     lastStamp = flag.Int64("t", -1, "Last timestamp in milliseconds")
 )
