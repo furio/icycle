@@ -7,6 +7,7 @@ import (
     "runtime"
     "flag"
     "log"
+    "strconv"
     "github.com/furio/icycle/idworker"
 )
 
@@ -22,6 +23,11 @@ type Sequence struct {
     Sequence int64
     Error error
 }
+type SequenceStr struct {
+    Sequence string
+    Error error
+}
+
 
 func handlerTest(w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, "Hello World!")
@@ -31,6 +37,22 @@ func handlerId(w http.ResponseWriter, r *http.Request) {
     seq,err := idGenerator.NextId();
 
     profile := Sequence{seq, err}
+
+    js, err := json.Marshal(profile)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    log.Printf("%s", js)
+    w.Header().Set("Content-Type", "application/json")
+    w.Write(js)
+}
+
+func handlerIdStr(w http.ResponseWriter, r *http.Request) {
+    seq,err := idGenerator.NextId();
+
+    profile := SequenceStr{strconv.FormatInt(seq, 10), err}
 
     js, err := json.Marshal(profile)
     if err != nil {
@@ -57,6 +79,7 @@ func Main() {
     http.HandleFunc("/", handlerTest)
 
     http.HandleFunc("/id", handlerId)
+    http.HandleFunc("/id/str", handlerIdStr)
     http.HandleFunc("/worker", handlerWorker)
 
     log.Printf("Serving on port :%s", *port)
