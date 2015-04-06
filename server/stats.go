@@ -20,9 +20,9 @@ func NewStats() (*Stats) {
 
 func (s *Stats) RecordRequest(startTime time.Time) {
     s.requests += 1
-    s.requestsTime += uint64(time.Since(startTime).Nanoseconds())
+    s.requestsTime += uint64(time.Since(startTime).Nanoseconds()) / uint64(time.Millisecond)
 }
 
 func (s *Stats) TotalStats() string {
-    return fmt.Sprintf("Requests: %d, Time: %d ns, Avg: %d ns/req", s.requests, s.requestsTime, s.requestsTime/s.requests)
+    return fmt.Sprintf("Requests: %d, Time: %d ms, Avg: %d ms/req", s.requests, s.requestsTime, s.requestsTime/s.requests)
 }
