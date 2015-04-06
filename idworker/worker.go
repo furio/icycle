@@ -8,7 +8,9 @@ import (
 )
 
 const (
+    golangMillis = int64(time.Millisecond)
     twitterEpoch = int64(1288834974657)
+
     workerIdBits = uint64(5)
     datacenterIdBits = uint64(5)
     maxWorkerId = int64(-1) ^ (int64(-1) << workerIdBits)
@@ -51,7 +53,7 @@ func NewIdWorker(wId int64, dId int64, lts int64) (*IdWorker, error) {
 }
 
 func millis() int64 {
-    return time.Now().UnixNano() / 1e6
+    return time.Now().UnixNano() / golangMillis
 }
 
 func (w *IdWorker) String() string {
